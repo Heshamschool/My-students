@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>قراءة البيانات الممثلة بالصور ٤-٣</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f8ec; --card:#ffffff; --ink:#1f2a44; --muted:#5b6478;
+  --green:#6aa832; --green-d:#4c8a1c; --blue:#1f5fbf; --blue-l:#dbe8fb;
+  --red:#c8382f; --yellow:#ffe14d; --orange:#f39a1e; --line:#d8e2c8;
+  --ok:#2e9b4f; --bad:#d64541;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal",Tahoma,Arial,sans-serif;font-size:19px;line-height:1.7}
+button{font-family:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(90deg,var(--blue),#2f7be0);color:#fff;padding:10px 16px;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+.title{font-size:24px;font-weight:800;margin:0}
+.title small{font-size:15px;font-weight:500;opacity:.9;display:block;line-height:1.2}
+.timer{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:14px}
+.timer .t{font-size:26px;font-weight:800;min-width:72px;text-align:center;direction:ltr}
+.timer button{background:#fff;color:var(--blue);border:0;border-radius:10px;padding:4px 12px;font-weight:700;font-size:16px}
+.timer.done{background:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.6}}
+nav{display:flex;gap:6px;margin-top:8px;overflow-x:auto}
+nav button{flex:1;min-width:110px;border:0;border-radius:12px;padding:8px 6px;background:rgba(255,255,255,.18);color:#fff;font-weight:700;font-size:16px;white-space:nowrap}
+nav button.on{background:var(--yellow);color:var(--ink)}
+main{max-width:1000px;margin:0 auto;padding:18px 16px 60px}
+section.stage{display:none}
+section.stage.on{display:block;animation:fade .35s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1}}
+h2{font-size:28px;margin:4px 0 14px;color:var(--green-d)}
+h3{font-size:21px;margin:0 0 10px;color:var(--blue)}
+.card{background:var(--card);border-radius:20px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(40,60,20,.08);border:2px solid var(--line)}
+.idea{background:linear-gradient(135deg,#eaf6d8,#fff8c9)}
+.hl{background:var(--yellow);padding:0 6px;border-radius:6px;font-weight:700}
+.btn{border:0;border-radius:14px;padding:10px 18px;font-size:19px;font-weight:700;background:var(--blue);color:#fff;transition:transform .1s}
+.btn:active{transform:scale(.95)}
+.btn.g{background:var(--green)} .btn.o{background:var(--orange)} .btn.r{background:var(--red)} .btn.l{background:var(--blue-l);color:var(--blue)}
+.btn.sel{outline:4px solid var(--yellow)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.center{justify-content:center}
+.big{font-size:44px;font-weight:800;color:var(--blue)}
+.reveal{display:none;margin-top:10px;padding:10px 14px;border-radius:14px;background:#eaf6d8;font-weight:700}
+.reveal.on{display:block;animation:fade .3s}
+table{border-collapse:collapse}
+th,td{border:2px solid var(--ink);padding:6px 8px;text-align:center;vertical-align:middle}
+th{background:var(--blue-l);font-size:18px}
+.tt{width:100%}
+.tt td:first-child{white-space:nowrap;font-weight:700}
+td.tl{min-width:120px;height:52px}
+.tally{display:inline-block;vertical-align:middle}
+.tally line{stroke:var(--ink);stroke-width:4;stroke-linecap:round}
+.tally .slash{stroke:var(--red)}
+.mini{border:0;border-radius:10px;width:40px;height:40px;font-size:24px;font-weight:800;background:var(--green);color:#fff;line-height:1}
+.mini.m{background:#aab3c5}
+.msg{min-height:34px;font-weight:700;color:var(--red);text-align:center}
+.opts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.opt{border:3px solid var(--blue-l);background:#fff;border-radius:16px;padding:8px 20px;font-size:24px;font-weight:800;color:var(--ink);min-width:70px}
+.opt.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.no{background:var(--bad);border-color:var(--bad);color:#fff;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.two{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:start}
+@media(max-width:780px){.two{grid-template-columns:1fr}}
+/* التمثيل بالصور */
+.pgwrap{border:3px solid var(--blue);border-radius:16px;padding:10px;background:#eef5ff;max-width:100%;overflow-x:auto}
+.pgtitle{text-align:center;font-weight:800;font-size:20px;margin-bottom:4px}
+.pg{margin:0 auto}
+.pg td{width:50px;height:50px;padding:0;font-size:30px;background:#fff}
+.pg td.cell{cursor:pointer}
+.pg td.cell:hover{background:#f3f8ff}
+.pg.static td.cell{cursor:default}
+.pg td.lab{width:auto;min-width:130px;font-size:18px;font-weight:700;padding:0 8px;white-space:nowrap}
+.pop{animation:pop .25s}
+@keyframes pop{from{transform:scale(.3)}to{transform:scale(1)}}
+.key{border:2px solid var(--ink);background:#fff;border-radius:8px;padding:4px 12px;margin:8px auto 0;display:table;font-weight:700}
+.kp{display:inline-flex;flex-direction:column;align-items:center;font-size:42px;margin:0 4px;line-height:1.2}
+.kp small{font-size:20px;color:var(--blue);font-weight:800}
+.shoes{min-height:70px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.quizbox{text-align:center}
+.quizbox .q{font-size:24px;font-weight:700;margin-bottom:6px}
+.qv{font-size:40px;min-height:70px}
+.qv .ql{font-size:20px;font-weight:700}
+.stars{font-size:30px;letter-spacing:4px}
+.progress{height:12px;background:#e6ebf2;border-radius:8px;overflow:hidden;margin:8px 0 14px}
+.progress div{height:100%;background:var(--green);transition:width .3s}
+.item{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 0;border-bottom:1px dashed var(--line)}
+.num{background:var(--blue);color:#fff;border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.inp{font-family:inherit;font-size:22px;width:70px;text-align:center;border:2px solid var(--line);border-radius:10px;padding:2px}
+.good{border-color:var(--ok)!important;background:#e5f6ea!important}
+.wrong{border-color:var(--bad)!important;background:#fde8e7!important}
+.result{font-size:24px;font-weight:800;text-align:center;margin-top:12px}
+.name{font-family:inherit;font-size:20px;border:0;border-bottom:2px dotted var(--muted);background:transparent;width:220px;padding:2px 6px}
+.foot{font-size:15px;color:var(--muted);text-align:center;margin-top:20px}
+@media (max-width:600px){body{font-size:17px}.title{font-size:19px}h2{font-size:23px}.big{font-size:36px}.pg td{width:40px;height:40px;font-size:24px}.pg td.lab{min-width:100px;font-size:15px}.kp{font-size:32px}}
+@media print{
+  header,.noprint,nav{display:none!important}
+  section.stage{display:none!important}
+  #s4{display:block!important}
+  body{background:#fff;font-size:15px}
+  .card{box-shadow:none;break-inside:avoid}
+}
+.pg td{position:relative}
+.pg td svg{width:34px;height:34px;vertical-align:middle}
+.pg td.lab svg{width:26px;height:26px}
+.pg td.hit{background:#fff6c2}
+.pg td.hit::after{content:attr(data-n);position:absolute;top:1px;right:3px;font-size:13px;font-weight:800;color:var(--red);line-height:1}
+.pg td.extra{background:#ffd9a8!important;outline:3px solid var(--orange);outline-offset:-3px}
+.pg td.lock{cursor:default}
+.ic svg{width:26px;height:26px;vertical-align:middle}
+.cntbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.qa{padding:10px 0;border-bottom:1px dashed var(--line)}
+.qa:last-child{border-bottom:0}
+.qa .row{margin-top:6px}
+.tip{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.tip div{background:#f1f6ff;border-radius:14px;padding:10px;text-align:center;font-weight:700}
+.tip b{display:block;font-size:26px}
+.think{background:linear-gradient(135deg,#e6f2ff,#f5fbff);border-color:#b9d4f5}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1 class="title">قِرَاءَةُ الْبَيَانَاتِ الْمُمَثَّلَةِ بِالصُّوَرِ (٤-٣)<small>رياضيات — الصف الثاني الابتدائي · ص ٨٨</small></h1>
+    <div class="timer" id="timer">
+      <span class="t" id="tval">٣:٠٠</span>
+      <button id="tbtn">ابدأ</button>
+      <button id="treset" title="إعادة">↺</button>
+    </div>
+  </div>
+  <nav id="nav">
+    <button data-s="1" class="on">١ التهيئة · ٣ د</button>
+    <button data-s="2">٢ الدرس · ١٠ د</button>
+    <button data-s="3">٣ المراجعة · ٤ د</button>
+    <button data-s="4">٤ ورقة العمل · ٣ د</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ ١ التهيئة ============ -->
+<section class="stage on" id="s1">
+  <h2>التَّهْيِئَةُ</h2>
+  <div class="card">
+    <h3>🔁 تَذَكَّرْ: انْظُرْ إِلَى الْمِفْتَاحِ ثُمَّ عُدَّ</h3>
+    <div id="wu"></div>
+  </div>
+  <div class="card think">
+    <h3>☁️ أُفَكِّرُ</h3>
+    <div id="wuG"></div>
+    <p style="margin-top:10px"><b>مَاذَا يُمْكِنُ أَنْ أَتَعَلَّمَ مِنْ هَذَا التَّمْثِيلِ؟</b> (يَقْتَرِحُ الطُّلَّابُ أَفْكَارَهُمْ)</p>
+    <button class="btn o" data-reveal="r1">أَفْكَارٌ مُقْتَرَحَةٌ</button>
+    <div class="reveal" id="r1">أَعْرِفُ الْخُضْرَوَاتِ <b>الأَكْثَرَ</b> وَ<b>الأَقَلَّ</b> تَفْضِيلًا، وَ<b>مَجْمُوعَ</b> مَنْ أَجَابُوا، وَ<b>الْفَرْقَ</b> بَيْنَ نَوْعَيْنِ. 🎉 هَذَا دَرْسُنَا الْيَوْمَ!</div>
+  </div>
+</section>
+
+<!-- ============ ٢ الدرس ============ -->
+<section class="stage" id="s2">
+  <h2>الدَّرْسُ</h2>
+  <div class="card idea">
+    <h3>💡 فِكْرَةُ الدَّرْسِ</h3>
+    <p>أَتَوَصَّلُ إِلَى <span class="hl">نَتَائِجَ</span>، وَأُجِيبُ عَنْ <span class="hl">أَسْئِلَةٍ</span> اعْتِمَادًا عَلَى التَّمْثِيلِ بِالصُّوَرِ.</p>
+  </div>
+
+  <div class="card">
+    <h3>🥕 الْخُضْرَوَاتُ الْمُفَضَّلَةُ: أَعُدُّ الصُّوَرَ</h3>
+    <div id="mainG"></div>
+    <div class="cntbar noprint" id="cntBtns"></div>
+    <div class="msg" id="cntMsg" style="color:var(--blue)"></div>
+  </div>
+
+  <div class="card">
+    <h3>🧭 كَيْفَ أَقْرَأُ التَّمْثِيلَ بِالصُّوَرِ؟</h3>
+    <div class="tip">
+      <div><b>⬅️ الأَطْوَلُ</b>الصَّفُّ الأَطْوَلُ = الأَكْثَرُ</div>
+      <div><b>↔️ الأَقْصَرُ</b>الصَّفُّ الأَقْصَرُ = الأَقَلُّ</div>
+      <div><b>➕ الْمَجْمُوعُ</b>أَجْمَعُ أَعْدَادَ الصُّفُوفِ</div>
+      <div><b>➖ كَمْ يَزِيدُ؟</b>أُقَارِنُ الصَّفَّيْنِ وَأَطْرَحُ</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>✅ أَتَأَكَّدُ: أَسْتَعْمِلُ التَّمْثِيلَ بِالصُّوَرِ أَعْلَاهُ لِلإِجَابَةِ</h3>
+
+    <div class="qa"><span class="num">١</span> مَا عَدَدُ أَنْوَاعِ الْخُضْرَوَاتِ الْمَعْرُوضَةِ؟
+      <div class="row"><input class="inp" inputmode="numeric" data-ans="4"> أَنْوَاعٍ <button class="btn l chk">تَحَقَّقْ</button></div></div>
+
+    <div class="qa"><span class="num">٢</span> مَا مَجْمُوعُ الأَشْخَاصِ الَّذِينَ يُفَضِّلُونَ الْبَازِلَّاءَ وَالْبَطَاطَا؟
+      <div class="row"><input class="inp" inputmode="numeric" data-ans="6"> + <input class="inp" inputmode="numeric" data-ans="7"> = <input class="inp" inputmode="numeric" data-ans="13"> شَخْصًا <button class="btn l chk">تَحَقَّقْ</button></div></div>
+
+    <div class="qa"><span class="num">٣</span> كَمْ يَزِيدُ عَدَدُ الَّذِينَ يُفَضِّلُونَ الذُّرَةَ عَلَى الَّذِينَ اخْتَارُوا الْفَاصُولْيَاءَ؟
+      <div class="row"><input class="inp" inputmode="numeric" data-ans="5"> − <input class="inp" inputmode="numeric" data-ans="3"> = <input class="inp" inputmode="numeric" data-ans="2"> شَخْصٍ <button class="btn l chk">تَحَقَّقْ</button> <button class="btn o" id="cmpBtn">قَارِنِ الصَّفَّيْنِ 👀</button></div></div>
+
+    <div class="qa"><span class="num">٤</span> أَيُّ أَنْوَاعِ الْخُضْرَوَاتِ حَصَلَ عَلَى أَقَلِّ عَدَدٍ مِنَ الِاسْتِجَابَاتِ؟
+      <div class="opts" id="q4" style="justify-content:flex-start"></div></div>
+
+    <div class="qa"><span class="num">٥</span> مَا عَدَدُ الأَشْخَاصِ الَّذِينَ اسْتَجَابُوا لِسُؤَالِ جَمْعِ الْبَيَانَاتِ؟
+      <div class="row"><input class="inp" inputmode="numeric" data-ans="21"> شَخْصًا <button class="btn l chk">تَحَقَّقْ</button> <button class="btn o" data-reveal="h5">تَلْمِيحٌ</button></div>
+      <div class="reveal" id="h5">٦ + ٥ + ٣ + ٧ = ٢١</div></div>
+
+    <div class="qa"><span class="num">٦</span> كَيْفَ سَيُصْبِحُ هَذَا التَّمْثِيلُ إِذَا أَضَفْتُ إِلَيْهِ خِيَارًا آخَرَ؟
+      <div class="row"><button class="btn g" id="addCarrot">أَضِفِ الْجَزَرَ 🥕</button> <button class="btn l" id="resetMain">أَعِدِ التَّمْثِيلَ</button></div>
+      <div class="reveal" id="r6">يُصْبِحُ فِيهِ <b>صَفٌّ خَامِسٌ</b> لِلْجَزَرِ، وَيَزِيدُ <b>الْمَجْمُوعُ</b>، وَقَدْ يَتَغَيَّرُ الأَكْثَرُ أَوِ الأَقَلُّ. اضْغَطْ عَلَى مُرَبَّعَاتِ الْجَزَرِ لِتَرْسُمَ صُوَرَهُ!</div></div>
+  </div>
+
+  <div class="card">
+    <h3>💬 أَتَحَدَّثُ</h3>
+    <p><span class="num">٧</span> مَنْ يُمْكِنُهُ أَنْ يَسْتَفِيدَ مِنْ تِلْكَ الْمَعْلُومَاتِ؟</p>
+    <button class="btn o" data-reveal="r2">أَظْهِرِ الإِجَابَةَ</button>
+    <div class="reveal" id="r2">بَائِعُ الْخُضَارِ (يَعْرِفُ مَاذَا يَشْتَرِي أَكْثَرَ) · مَقْصَفُ الْمَدْرَسَةِ · الأُمُّ عِنْدَ إِعْدَادِ الطَّعَامِ · الْمَطْعَمُ.</div>
+  </div>
+</section>
+
+<!-- ============ ٣ المراجعة ============ -->
+<section class="stage" id="s3">
+  <h2>الْمُرَاجَعَةُ</h2>
+  <div class="card"><div id="revG"></div></div>
+  <div class="card quizbox">
+    <div class="progress"><div id="qBar" style="width:0"></div></div>
+    <div class="q" id="qText"></div>
+    <div class="opts" id="qOpts"></div>
+    <div class="msg" id="qMsg" style="margin-top:8px"></div>
+    <button class="btn" id="qNext" style="display:none">السُّؤَالُ التَّالِي ⬅</button>
+    <div id="qEnd" style="display:none">
+      <div class="stars" id="qStars"></div>
+      <div class="result" id="qScore"></div>
+      <button class="btn g" id="qAgain">أَعِدِ الْمُرَاجَعَةَ</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ٤ ورقة العمل ============ -->
+<section class="stage" id="s4">
+  <h2>وَرَقَةُ الْعَمَلِ: قِرَاءَةُ الْبَيَانَاتِ الْمُمَثَّلَةِ بِالصُّوَرِ</h2>
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <span>اسْمُ الطَّالِبِ: <input class="name" id="sname"></span>
+      <span>الصَّفُّ: الثَّانِي / ......</span>
+    </div>
+  </div>
+  <div class="card">
+    <h3>سَأَلَ الْمُعَلِّمُ طُلَّابَ الصَّفِّ عَنْ رِيَاضَتِهِمُ الْمُفَضَّلَةِ. أَسْتَعْمِلُ التَّمْثِيلَ لِلإِجَابَةِ:</h3>
+    <div id="wsG"></div>
+    <div id="wsQ" style="margin-top:10px">
+      <div class="qa"><span class="num">١</span> مَا عَدَدُ أَنْوَاعِ الرِّيَاضَةِ؟ <input class="inp" inputmode="numeric" data-w="4"> أَنْوَاعٍ</div>
+      <div class="qa"><span class="num">٢</span> مَا الرِّيَاضَةُ الأَكْثَرُ تَفْضِيلًا؟ <select class="inp" style="width:auto" data-w="كرة القدم"><option value="">اخْتَرْ</option><option>كرة القدم</option><option>السباحة</option><option>الدراجة</option><option>الجري</option></select></div>
+      <div class="qa"><span class="num">٣</span> مَا الرِّيَاضَةُ الأَقَلُّ تَفْضِيلًا؟ <select class="inp" style="width:auto" data-w="الجري"><option value="">اخْتَرْ</option><option>كرة القدم</option><option>السباحة</option><option>الدراجة</option><option>الجري</option></select></div>
+      <div class="qa"><span class="num">٤</span> كَمْ طَالِبًا يُفَضِّلُ السِّبَاحَةَ؟ (انْتَبِهْ لِلْمِفْتَاحِ) <input class="inp" inputmode="numeric" data-w="4"> طُلَّابٍ</div>
+      <div class="qa"><span class="num">٥</span> كَمْ يَزِيدُ عَدَدُ مُحِبِّي كُرَةِ الْقَدَمِ عَلَى مُحِبِّي الدَّرَّاجَةِ؟
+        <input class="inp" inputmode="numeric" data-w="8"> − <input class="inp" inputmode="numeric" data-w="6"> = <input class="inp" inputmode="numeric" data-w="2"></div>
+      <div class="qa"><span class="num">٦</span> مَا عَدَدُ الطُّلَّابِ الَّذِينَ أَجَابُوا عَنِ السُّؤَالِ؟ <input class="inp" inputmode="numeric" data-w="20"> طَالِبًا</div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🏠 نَشَاطٌ مَنْزِلِيٌّ</h3>
+    <p>اسْأَلْ أَفْرَادَ أُسْرَتِكَ عَنْ فَاكِهَتِهِمُ الْمُفَضَّلَةِ، وَمَثِّلِ الإِجَابَاتِ بِالصُّوَرِ، ثُمَّ اكْتُبْ سُؤَالَيْنِ عَنْ تَمْثِيلِكَ.</p>
+  </div>
+  <div class="row center noprint">
+    <button class="btn g" id="wCheck">تَحَقَّقْ مِنْ إِجَابَاتِي ✔</button>
+    <button class="btn l" id="wReset">مَسْح</button>
+    <button class="btn o" onclick="window.print()">طِبَاعَة 🖨</button>
+  </div>
+  <div class="result" id="wResult"></div>
+</section>
+
+<div class="foot">ابتدائية هشام بن عبد الملك — الخرج · معلم المادة: محمد مشعل العنزي</div>
+</main>
+
+<script>
+/* ---------- أدوات ---------- */
+const AR='٠١٢٣٤٥٦٧٨٩';
+const ar=n=>String(n).replace(/\d/g,d=>AR[d]);
+const norm=s=>String(s).trim().replace(/[٠-٩]/g,d=>AR.indexOf(d));
+const num=s=>parseInt(norm(s),10);
+const $=id=>document.getElementById(id);
+let actx;
+function beep(ok=true){
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);
+    o.frequency.value=ok?880:220;o.type=ok?'sine':'square';g.gain.value=.08;
+    o.start();o.stop(actx.currentTime+(ok?.15:.25));
+    if(ok){const o2=actx.createOscillator();o2.connect(g);o2.frequency.value=1175;o2.start(actx.currentTime+.15);o2.stop(actx.currentTime+.3);}
+  }catch(e){}
+}
+function mark(el,ok){el.classList.remove('good','wrong');el.classList.add(ok?'good':'wrong');return ok?1:0;}
+function optClick(b,ok){
+  if(ok){b.classList.add('ok');beep();}
+  else{b.classList.add('no');beep(false);setTimeout(()=>b.classList.remove('no'),600);}
+}
+
+/* أيقونات الخضار (SVG تعمل على كل الأجهزة) */
+const PEA='<svg viewBox="0 0 40 40"><path d="M3 27 Q18 6 37 13 Q24 35 3 27Z" fill="#5aa832" stroke="#2f6b12" stroke-width="2"/><circle cx="12" cy="23" r="3.6" fill="#a8e86b"/><circle cx="19.5" cy="20" r="3.6" fill="#a8e86b"/><circle cx="27" cy="17" r="3.6" fill="#a8e86b"/></svg>';
+const BEAN='<svg viewBox="0 0 40 40"><path d="M3 31 Q6 21 18 19 Q31 17 37 7 Q38 22 23 27 Q12 30 3 31Z" fill="#8cc63f" stroke="#4a7a1c" stroke-width="2"/><ellipse cx="11" cy="26" rx="3" ry="2.3" fill="#d9f0b8"/><ellipse cx="19" cy="23.5" rx="3" ry="2.3" fill="#d9f0b8"/><ellipse cx="27" cy="20" rx="3" ry="2.3" fill="#d9f0b8"/></svg>';
+
+/* شبكة التمثيل بالصور */
+function makeGrid(el,{title,rows,cols,keyText,interactive=false,lock=[]}){
+  const vals=rows.map(r=>r.v||0);
+  let h=`<div class="pgwrap"><div class="pgtitle">${title}</div><table class="pg${interactive?'':' static'}"><tbody>`;
+  rows.forEach((r,i)=>{
+    h+=`<tr><td class="lab" style="background:${r.bg}"><span class="ic">${r.e}</span> ${r.n}</td>`;
+    for(let c=0;c<cols;c++) h+=`<td class="cell${lock.includes(i)?' lock':''}" data-r="${i}" data-c="${c}"></td>`;
+    h+='</tr>';
+  });
+  h+=`</tbody></table><div class="key">${keyText}</div></div>`;
+  el.innerHTML=h;
+  const cells=[...el.querySelectorAll('td.cell')];
+  const g={vals,
+    row:r=>cells.filter(td=>+td.dataset.r===r),
+    render(){cells.forEach(td=>{
+      const r=+td.dataset.r,c=+td.dataset.c,f=c<vals[r],had=td.dataset.f==='1';
+      td.innerHTML=f?rows[r].e:'';td.dataset.f=f?'1':'0';
+      td.classList.remove('pop'); if(f&&!had){void td.offsetWidth;td.classList.add('pop');}
+    });},
+    clearMarks(){cells.forEach(td=>{td.classList.remove('hit','extra');td.removeAttribute('data-n');});}
+  };
+  if(interactive) el.addEventListener('click',e=>{
+    const td=e.target.closest('td.cell');if(!td||td.classList.contains('lock'))return;
+    const r=+td.dataset.r,c=+td.dataset.c;
+    vals[r]=(vals[r]===c+1)?c:c+1;g.render();beep();
+  });
+  g.render();
+  return g;
+}
+
+/* ---------- التنقل والمؤقت ---------- */
+const mins={1:3,2:10,3:4,4:3};
+let cur=1,left=180,run=false,tick;
+function showT(){const m=Math.floor(left/60),s=left%60;$('tval').textContent=ar(m)+':'+ar(String(s).padStart(2,'0'));}
+function resetT(){clearInterval(tick);run=false;left=mins[cur]*60;$('tbtn').textContent='ابدأ';$('timer').classList.remove('done');showT();}
+function setStage(n){
+  cur=n;document.querySelectorAll('.stage').forEach(s=>s.classList.toggle('on',s.id==='s'+n));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.s==n));
+  resetT();window.scrollTo({top:0,behavior:'smooth'});
+}
+$('tbtn').onclick=()=>{
+  if(run){clearInterval(tick);run=false;$('tbtn').textContent='ابدأ';return;}
+  run=true;$('tbtn').textContent='إيقاف';
+  tick=setInterval(()=>{if(left>0){left--;showT();}if(left===0){clearInterval(tick);run=false;$('tbtn').textContent='ابدأ';$('timer').classList.add('done');beep(false);}},1000);
+};
+$('treset').onclick=resetT;
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setStage(+b.dataset.s));
+document.querySelectorAll('[data-reveal]').forEach(b=>b.onclick=()=>$(b.dataset.reveal).classList.add('on'));
+showT();
+
+/* ---------- البيانات ---------- */
+const veg=[
+  {e:PEA,n:'الْبَازِلَّاءُ',v:6,bg:'#d6ecc9'},
+  {e:'🌽',n:'الذُّرَةُ',v:5,bg:'#fff3b0'},
+  {e:BEAN,n:'الْفَاصُولْيَاءُ',v:3,bg:'#d6ecc9'},
+  {e:'🥔',n:'الْبَطَاطَا',v:7,bg:'#fde2c4'}
+];
+const VKEY='الْمِفْتَاحُ: كُلُّ حَبَّةِ خُضَارٍ = اسْتِجَابَةٌ وَاحِدَةٌ';
+const VT='الْخُضْرَوَاتُ الْمُفَضَّلَةُ';
+
+/* ---------- ١ التهيئة ---------- */
+const wu=[
+  {v:'🍎🍎🍎🍎🍎',k:'كُلُّ 🍎 = ١',o:[4,5,6],a:5},
+  {v:'⚽⚽⚽',k:'كُلُّ ⚽ = ٢',o:[3,5,6],a:6}
+];
+$('wu').innerHTML=wu.map((w,i)=>`<div class="item"><span class="num">${ar(i+1)}</span><span style="font-size:34px">${w.v}</span>
+  <span class="key" style="margin:0">${w.k}</span><span>←</span>
+  <div class="opts" style="margin:0">${w.o.map(v=>`<button class="opt" data-wu="${i}" data-v="${v}">${ar(v)}</button>`).join('')}</div></div>`).join('');
+$('wu').addEventListener('click',e=>{const b=e.target.closest('[data-wu]');if(b)optClick(b,+b.dataset.v===wu[b.dataset.wu].a);});
+makeGrid($('wuG'),{title:VT,rows:veg,cols:7,keyText:VKEY});
+
+/* ---------- ٢ الدرس ---------- */
+let main,timers=[];
+function buildMain(withCarrot){
+  const rows=withCarrot?[...veg,{e:'🥕',n:'الْجَزَرُ',v:0,bg:'#ffe0c2'}]:veg;
+  main=makeGrid($('mainG'),{title:VT,rows,cols:7,keyText:VKEY,interactive:withCarrot,lock:[0,1,2,3]});
+}
+buildMain(false);
+$('cntBtns').innerHTML=veg.map((r,i)=>`<button class="btn l" data-cnt="${i}"><span class="ic">${r.e}</span> عُدَّ ${r.n.replace(/ُ$/,'')}</button>`).join('');
+$('cntBtns').addEventListener('click',e=>{
+  const b=e.target.closest('[data-cnt]');if(!b)return;
+  const r=+b.dataset.cnt;timers.forEach(clearTimeout);main.clearMarks();$('cntMsg').textContent='';
+  const cells=main.row(r).slice(0,main.vals[r]);
+  timers=cells.map((td,k)=>setTimeout(()=>{td.classList.add('hit');td.dataset.n=ar(k+1);beep();
+    if(k===cells.length-1)$('cntMsg').innerHTML=`${veg[r].n}: <b>${ar(cells.length)}</b> اسْتِجَابَاتٍ`;},400*(k+1)));
+});
+$('cmpBtn').onclick=()=>{
+  timers.forEach(clearTimeout);main.clearMarks();
+  main.row(1).slice(3,5).forEach(td=>td.classList.add('extra'));
+  $('cntMsg').innerHTML='الذُّرَةُ تَزِيدُ عَلَى الْفَاصُولْيَاءِ بِـ <b>٢</b> (الْمُرَبَّعَانِ الْبُرْتُقَالِيَّانِ)';
+  window.scrollTo({top:$('mainG').getBoundingClientRect().top+scrollY-150,behavior:'smooth'});
+};
+$('addCarrot').onclick=()=>{buildMain(true);$('r6').classList.add('on');$('cntMsg').textContent='';
+  window.scrollTo({top:$('mainG').getBoundingClientRect().top+scrollY-150,behavior:'smooth'});};
+$('resetMain').onclick=()=>{buildMain(false);$('cntMsg').textContent='';};
+
+document.querySelectorAll('#s2 .chk').forEach(b=>b.onclick=()=>{
+  const ins=[...b.closest('.qa').querySelectorAll('[data-ans]')];
+  let ok=0;ins.forEach(i=>ok+=mark(i,num(i.value)===+i.dataset.ans));
+  beep(ok===ins.length);
+});
+$('q4').innerHTML=veg.map((r,i)=>`<button class="opt" style="font-size:20px" data-i="${i}"><span class="ic">${r.e}</span> ${r.n}</button>`).join('');
+$('q4').addEventListener('click',e=>{const b=e.target.closest('.opt');if(b)optClick(b,b.dataset.i==='2');});
+
+/* ---------- ٣ المراجعة ---------- */
+const juice=[
+  {e:'🍊',n:'الْبُرْتُقَالُ',v:4,bg:'#fde2c4'},
+  {e:'🍎',n:'التُّفَّاحُ',v:6,bg:'#f9d0cc'},
+  {e:'🥭',n:'الْمَانْجُو',v:3,bg:'#fff3b0'},
+  {e:'🍓',n:'الْفَرَاوِلَةُ',v:5,bg:'#f9d0cc'}
+];
+makeGrid($('revG'),{title:'الْعَصِيرُ الْمُفَضَّلُ',rows:juice,cols:6,keyText:'الْمِفْتَاحُ: كُلُّ صُورَةٍ = اسْتِجَابَةٌ وَاحِدَةٌ'});
+const quiz=[
+  {q:'مَا الْعَصِيرُ الأَكْثَرُ تَفْضِيلًا؟',o:['الْبُرْتُقَالُ','التُّفَّاحُ','الْفَرَاوِلَةُ'],a:'التُّفَّاحُ'},
+  {q:'مَا الْعَصِيرُ الأَقَلُّ تَفْضِيلًا؟',o:['الْمَانْجُو','الْبُرْتُقَالُ','الْفَرَاوِلَةُ'],a:'الْمَانْجُو'},
+  {q:'كَمْ عَدَدُ أَنْوَاعِ الْعَصِيرِ؟',o:[3,4,6],a:4},
+  {q:'مَا مَجْمُوعُ مَنْ يُفَضِّلُونَ الْبُرْتُقَالَ وَالْفَرَاوِلَةَ؟',o:[8,9,10],a:9},
+  {q:'كَمْ يَزِيدُ مُحِبُّو التُّفَّاحِ عَلَى مُحِبِّي الْمَانْجُو؟',o:[2,3,9],a:3},
+  {q:'مَا عَدَدُ الَّذِينَ أَجَابُوا عَنِ السُّؤَالِ كُلِّهِمْ؟',o:[15,18,20],a:18},
+  {q:'لَوْ كَانَ الْمِفْتَاحُ: كُلُّ صُورَةٍ = ٢، فَكَمْ شَخْصًا يُفَضِّلُ التُّفَّاحَ؟',o:[6,8,12],a:12}
+];
+let qi=0,answered=false;
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const fmt=v=>typeof v==='number'?ar(v):v;
+function showQ(){
+  const q=quiz[qi];answered=false;
+  $('qBar').style.width=(qi/quiz.length*100)+'%';
+  $('qText').textContent=`${ar(qi+1)}) ${q.q}`;
+  $('qMsg').textContent='';$('qNext').style.display='none';
+  $('qOpts').innerHTML=shuffle(q.o).map(v=>`<button class="opt" data-v="${v}">${fmt(v)}</button>`).join('');
+}
+$('qOpts').onclick=e=>{
+  const b=e.target.closest('.opt');if(!b||answered||b.disabled)return;
+  const q=quiz[qi];
+  if(b.dataset.v===String(q.a)){b.classList.add('ok');answered=true;beep();$('qMsg').style.color='var(--ok)';$('qMsg').textContent='أَحْسَنْتَ! 🌟';$('qNext').style.display='inline-block';}
+  else{b.classList.add('no');b.disabled=true;q.miss=true;beep(false);$('qMsg').style.color='var(--red)';$('qMsg').textContent='حَاوِلْ مَرَّةً أُخْرَى، انْظُرْ إِلَى طُولِ الصُّفُوفِ وَالْمِفْتَاحِ';}
+};
+$('qNext').onclick=()=>{qi++; if(qi<quiz.length) showQ(); else endQ();};
+function endQ(){
+  $('qBar').style.width='100%';$('qText').textContent='انْتَهَتِ الْمُرَاجَعَةُ!';$('qOpts').innerHTML='';$('qMsg').textContent='';$('qNext').style.display='none';
+  const first=quiz.filter(q=>!q.miss).length;
+  $('qStars').textContent='⭐'.repeat(Math.max(1,Math.round(first/quiz.length*5)));
+  $('qScore').textContent=`أَجَبْتَ صَحِيحًا مِنَ الْمُحَاوَلَةِ الأُولَى: ${ar(first)} مِنْ ${ar(quiz.length)}`;
+  $('qEnd').style.display='block';
+}
+$('qAgain').onclick=()=>{qi=0;quiz.forEach(q=>delete q.miss);$('qEnd').style.display='none';showQ();};
+showQ();
+
+/* ---------- ٤ ورقة العمل ---------- */
+const sports=[
+  {e:'⚽',n:'كُرَةُ الْقَدَمِ',v:4,bg:'#d6ecc9'},
+  {e:'🏊',n:'السِّبَاحَةُ',v:2,bg:'#dbe8fb'},
+  {e:'🚲',n:'الدَّرَّاجَةُ',v:3,bg:'#fff3b0'},
+  {e:'🏃',n:'الْجَرْيُ',v:1,bg:'#fde2c4'}
+];
+makeGrid($('wsG'),{title:'الرِّيَاضَةُ الْمُفَضَّلَةُ',rows:sports,cols:5,keyText:'الْمِفْتَاحُ: كُلُّ صُورَةٍ = اسْتِجَابَتَانِ'});
+$('wCheck').onclick=()=>{
+  let s=0,t=0;
+  document.querySelectorAll('#wsQ [data-w]').forEach(el=>{
+    t++;const want=el.dataset.w;
+    s+=mark(el, el.tagName==='SELECT' ? el.value===want : num(el.value)===+want);
+  });
+  $('wResult').innerHTML= s===t ? `🎉 مُمْتَازٌ! ${ar(s)} مِنْ ${ar(t)}` : `دَرَجَتُكَ: ${ar(s)} مِنْ ${ar(t)} — صَحِّحِ الْمُلَوَّنَ بِالأَحْمَرِ`;
+  beep(s===t);
+};
+$('wReset').onclick=()=>{
+  document.querySelectorAll('#wsQ [data-w]').forEach(el=>{el.value='';el.classList.remove('good','wrong');});
+  $('wResult').textContent='';
+};
+</script>
+</body>
+</html>
